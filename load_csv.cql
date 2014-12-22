@@ -26,6 +26,7 @@ USING PERIODIC COMMIT 1000
 LOAD CSV WITH HEADERS FROM "file:///Users/brian/github/neo4jrb/lapd_incidents/db/LAPD_Crime_and_Collision_Raw_Data_-_2014.csv" AS line
 CREATE (incident:Incident
   {
+    id: line.id,
     dr_no: toInt(line.`DR NO`),
     location: line.LOCATION,
     date_reported: line.`Date Rptd`,

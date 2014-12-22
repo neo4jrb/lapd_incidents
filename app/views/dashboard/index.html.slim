@@ -1,0 +1,43 @@
+scss:
+  body { margin:0; padding:0; }
+  #map {
+    position:absolute; top:0; bottom:0; width:100%;
+
+    .attribution { display: none }
+  }
+
+
+#map
+  .attribution
+    markdown:
+      Map data &copy; [OpenStreetMap](http://openstreetmap.org) contributors, [CC-BY-SA](http://creativecommons.org/licenses/by-sa/2.0/), Imagery © [Mapbox](http://mapbox.com)
+
+
+javascript:
+  var iconUrl = '#{image_path 'marker-icon.png'}';
+  var shadowUrl = '#{image_path 'marker-shadow.png'}';
+
+coffee:
+  map = L.map('map').setView [34.0500, -118.2500], 10
+
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+      attribution: $('#map .attribution').html()
+      maxZoom: 18
+  ).addTo(map)
+
+
+  $.ajax('/incidents.json').done (incidents) ->
+    popup = L.popup()
+
+    icon = L.icon {iconUrl, shadowUrl}
+
+    for i in incidents when i.latitute? and i.longitude?
+      (->
+        incident = i
+        L.marker([incident.latitute, incident.longitude], {icon}).addTo(map).on 'click', (e) ->
+          console.log {incident}
+          popup.setLatLng(e.latlng)
+            .setContent("<p>#{incident.location}<br><a href=\"/incidents/#{incident.id}\" target=\"_blank\">Open in new page</a></p>")
+            .openOn(map);
+      )()
+

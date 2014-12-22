@@ -38,6 +38,7 @@ namespace :csv do
           row[0,9] + row[11, 1] + row[9,2] + row[12..-1]
         end
         new_row[9] = new_row[9].strip.gsub(/ +/, ' ')
+        new_row << SecureRandom.uuid if row.size == 14
         destination << new_row
       end
     end
@@ -59,6 +60,29 @@ namespace :csv do
     command = "#{server_path.join('bin/neo4j-shell')} -file #{cql_path}"
     puts command
     system(command)
+
+  end
+
+  task set_ids: :environment do
+    nodes_without_id = Neo4j::Session.query("MATCH (n) WHERE n.id IS NULL RETURN count(n) AS count").first.count
+    (nodes_without_id / 14).times do
+      putc '-'
+      Neo4j::Session.query("MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                            MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}' WITH 1 AS a
+                             MATCH (n) WHERE n.id IS NULL WITH n LIMIT 1 SET n.id = '#{SecureRandom.uuid}'")
+    end
+
   end
 
 end
