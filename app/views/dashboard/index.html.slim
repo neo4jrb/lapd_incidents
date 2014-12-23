@@ -1,11 +1,23 @@
 scss:
   body { margin:0; padding:0; }
   #map {
-    position:absolute; top:0; bottom:0; width:100%;
+    position:absolute; top:100px; bottom:0px; width:100%;
 
     .attribution { display: none }
   }
 
+
+form.form-horizontal
+
+  .form-group
+    label.col-sm-2.control-label Area
+    div.col-sm-10
+      = select_tag :area_number, options_from_collection_for_select(@areas, :number, :name), include_blank: true
+
+  .form-group
+    label.col-sm-2.control-label Crime
+    div.col-sm-10
+      = select_tag :crime_code, options_from_collection_for_select(@crimes, :code, :description), include_blank: true
 
 #map
   .attribution
@@ -18,26 +30,14 @@ javascript:
   var shadowUrl = '#{image_path 'marker-shadow.png'}';
 
 coffee:
-  map = L.map('map').setView [34.0500, -118.2500], 10
+  window.map = L.map('map').setView [34.0500, -118.2500], 10
 
   L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
       attribution: $('#map .attribution').html()
       maxZoom: 18
   ).addTo(map)
 
+  window.markers = new L.FeatureGroup()
 
-  $.ajax('/incidents.json').done (incidents) ->
-    popup = L.popup()
-
-    icon = L.icon {iconUrl, shadowUrl}
-
-    for i in incidents when i.latitute? and i.longitude?
-      (->
-        incident = i
-        L.marker([incident.latitute, incident.longitude], {icon}).addTo(map).on 'click', (e) ->
-          console.log {incident}
-          popup.setLatLng(e.latlng)
-            .setContent("<p>#{incident.location}<br><a href=\"/incidents/#{incident.id}\" target=\"_blank\">Open in new page</a></p>")
-            .openOn(map);
-      )()
+  populateMarkers()
 
