@@ -24,22 +24,28 @@ namespace :csv do
     header_processed = false
     CSV.open(tempfile.path, "wb") do |destination|
       CSV.foreach(path) do |row|
-        new_row = if row[10,1] == ['UNK']
-          putc '-'
-          row[0,8] + row[10, 1] + row[8,2] + row[11..-1]
-        elsif row[9,1] == ['UNK']
-          putc '+'
-          row
-        elsif %w{IC AA AO JA JO UNK}.include?(row[10]) || !header_processed
-          header_processed = true
-          row
+        result_row = if header_processed
+          new_row = if row[10,1] == ['UNK']
+            putc '-'
+            row[0,8] + row[10, 1] + row[8,2] + row[11..-1]
+          elsif row[9,1] == ['UNK']
+            putc '+'
+            row
+          elsif %w{IC AA AO JA JO UNK}.include?(row[10])
+            row
+          else
+            putc '.'
+            row[0,9] + row[11, 1] + row[9,2] + row[12..-1]
+          end
+          new_row[9] = new_row[9].strip.gsub(/ +/, ' ')
+          new_row[12] = new_row[9].strip.gsub(/ +/, ' ')
+          new_row << SecureRandom.uuid if row.size == 14
+          new_row
         else
-          putc '.'
-          row[0,9] + row[11, 1] + row[9,2] + row[12..-1]
+          header_processed = true
+          row[0,9] + row[11,1] + row[9,2] + row[12, 2] + ['id']
         end
-        new_row[9] = new_row[9].strip.gsub(/ +/, ' ')
-        new_row << SecureRandom.uuid if row.size == 14
-        destination << new_row
+        destination << result_row
       end
     end
 
